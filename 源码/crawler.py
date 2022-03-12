@@ -21,10 +21,15 @@ class Thread_1(QThread):  # 线程1
             f.write('中文名\t学名\t采集地\t属名\t采集人\t种名\t科名\r')
         with open(self.error_file, 'w', encoding='UTF-8') as f:
             f.write('物种名\t采集地\r')
+        run_names = {}
         for name in self.names:
             name = name.replace('\r', '')
             name = name.replace('\n', '')
+            if name == '': continue
+            if name in run_names.keys():
+                continue
             self.query_specimen(name)
+            run_names[name] = 1
         self._signal.emit('查找完成')
 
     def get_url(self, name, start):
@@ -85,6 +90,12 @@ class Thread_1(QThread):  # 线程1
                             if len(city) == 0:
                                 city = ' '
                             district = data['district']
+                            while type(district) == list:
+                                try:
+                                    district = district[0]
+                                except:
+                                    district = ''
+                                    break
                             location = data['location'].split(',', 1)
                             adcode = data['adcode']
                             if adcode not in loc_list:
